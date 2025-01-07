@@ -1,0 +1,38 @@
+.scroll-to-top {
+    position: fixed;
+    bottom: 20px; 
+    right: 20px;   
+    z-index: 1000; 
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .backToTopBtn {
+    background-color: #007bff; 
+    border: none;
+    border-radius: 50%;
+    padding: 15px;
+    font-size: 24px;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .backToTopBtn:hover {
+    background-color: #0056b3; 
+    transform: scale(1.1);  
+  }
+  
+  .arrow {
+    font-size: 18px;
+    margin: 0;
+  }
+  
+  .backToTopBtn:focus {
+    outline: none; 
+  }
+  
