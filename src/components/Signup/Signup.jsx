@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaApple, FaGoogle } from 'react-icons/fa';
 import { useNavigate } from 'react-router'; 
+import axios from 'axios';
 import Logo from "../../assets/samjodatechsolutions-logo.jpg";
 
 const Signup = () => {
@@ -39,19 +40,13 @@ const Signup = () => {
     }
 
     try {
-      const response = await fetch('/api/account/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
+      const response = await axios.post('https://localhost:7046/api/auth/signup', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error('Signup failed. Please try again.');
       }
 
@@ -63,7 +58,7 @@ const Signup = () => {
         confirmPassword: '',
       });
     } catch (err) {
-      setError(err.message || 'Signup failed. Please try again.');
+      setError(err.response?.data || 'Signup failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -203,7 +198,7 @@ const Signup = () => {
               value={formData.name}
               onChange={handleInputChange}
               required
-              placeholder="Your Full Name"
+              placeholder="Full Name"
               style={inputStyle}
             />
           </div>
@@ -219,7 +214,7 @@ const Signup = () => {
               value={formData.email}
               onChange={handleInputChange}
               required
-              placeholder="name@example.com"
+              placeholder="Enter your mail address"
               style={inputStyle}
             />
           </div>

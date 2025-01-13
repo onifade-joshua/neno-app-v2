@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { FaApple, FaGoogle } from 'react-icons/fa';
+import { useNavigate } from 'react-router'; 
+import axios from 'axios';
 import Logo from "../../assets/samjodatechsolutions-logo.jpg";
-import { useNavigate } from 'react-router';
 
-const Login = () => {
+const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
   });
-
-  const navigate = useNavigate();
+  
+  const navigate = useNavigate(); 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,34 +29,23 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/account/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      const response = await axios.post('https://localhost:7046/api/auth/login', {
+        email: formData.email,
+        password: formData.password,
       });
 
-      if (!response.ok) {
-        throw new Error('Invalid credentials');
+      if (response.status !== 200) {
+        throw new Error('Login failed. Please try again.');
       }
 
-      const data = await response.json();
-      console.log('Login successful:', data);
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      onLogin();
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      setError(err.response?.data || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSocialLogin = (provider) => {
-    console.log(`Logging in with ${provider}`);
-    // Implement social login logic here
-  };
-
-  const handleCreateAccountClick = () => {
-    navigate('/signup'); 
   };
 
   return (
@@ -66,7 +56,6 @@ const Login = () => {
       justifyContent: 'center',
       backgroundColor: 'white',
       padding: '5px',
-      zIndex: "inherit"
     }}>
       <div style={{
         width: '100%',
@@ -76,7 +65,7 @@ const Login = () => {
         borderRadius: '12px',
         boxShadow: '0 2px 10px rgba(0, 0, 0, 0.08)',
         position: 'absolute',
-        top: '62%',
+        top: '75.5%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
       }}>
@@ -99,63 +88,34 @@ const Login = () => {
             fontWeight: '600',
             color: '#1a1a1a',
             marginBottom: '8px'
-          }}>Welcome Back</h2>
+          }}>Log In to Your Account</h2>
           <p style={{
             color: '#666',
             fontSize: '14px'
-          }}>Please sign in to your account to continue</p>
+          }}>Sign in to continue</p>
         </div>
 
         {/* Social Login Buttons */}
         <div style={{ marginBottom: '32px' }}>
           <button
             type="button"
-            onClick={() => handleSocialLogin('google')}
+            onClick={() => console.log('Log in with Google')}
             style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: 'white',
-              border: '1px solid #e6e6e6',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              ...buttonStyle,
               marginBottom: '12px',
-              transition: 'background-color 0.2s',
             }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-            onMouseOut={(e) => e.target.style.backgroundColor = 'white'}
           >
             <FaGoogle style={{ marginRight: '8px' }}/>
-            Continue with Google
+            Log in with Google
           </button>
 
           <button
             type="button"
-            onClick={() => handleSocialLogin('apple')}
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: 'white',
-              border: '1px solid #e6e6e6',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '12px',
-              transition: 'background-color 0.2s',
-            }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-            onMouseOut={(e) => e.target.style.backgroundColor = 'white'}
+            onClick={() => console.log('Log in with Apple')}
+            style={buttonStyle}
           >
             <FaApple style={{ marginRight: '8px' }}/>
-            Continue with Apple
+            Log in with Apple
           </button>
         </div>
 
@@ -174,7 +134,7 @@ const Login = () => {
             padding: '0 16px',
             color: '#666',
             fontSize: '14px'
-          }}>or continue with email</span>
+          }}>or log in with email</span>
           <div style={{
             height: '1px',
             flex: 1,
@@ -198,16 +158,7 @@ const Login = () => {
 
         <form onSubmit={handleLogin}>
           <div style={{ marginBottom: '20px' }}>
-            <label 
-              htmlFor="email" 
-              style={{
-                display: 'block',
-                marginBottom: '8px',
-                color: '#333',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
+            <label htmlFor="email" style={labelStyle}>
               Email address
             </label>
             <input
@@ -217,54 +168,15 @@ const Login = () => {
               value={formData.email}
               onChange={handleInputChange}
               required
-              placeholder="name@example.com"
-              style={{
-                width: '93.3%',
-                padding: '12px',
-                border: '1px solid #e6e6e6',
-                borderRadius: '8px',
-                fontSize: '14px',
-                transition: 'border-color 0.2s',
-                outline: 'none',
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#0055ff'}
-              onBlur={(e) => e.target.style.borderColor = '#e6e6e6'}
+              placeholder="Enter your email address"
+              style={inputStyle}
             />
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '8px'
-            }}>
-              <label 
-                htmlFor="password"
-                style={{
-                  color: '#333',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
-                Password
-              </label>
-              <button
-                type="button"
-                onClick={() => console.log('Forgot password clicked')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#0055ff',
-                  cursor: 'pointer',
-                  padding: 0,
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
-                Forgot password?
-              </button>
-            </div>
+          <div style={{ marginBottom: '20px' }}>
+            <label htmlFor="password" style={labelStyle}>
+              Password
+            </label>
             <input
               id="password"
               name="password"
@@ -273,17 +185,7 @@ const Login = () => {
               onChange={handleInputChange}
               required
               placeholder="Enter your password"
-              style={{
-                width: '93.3%',
-                padding: '12px',
-                border: '1px solid #e6e6e6',
-                borderRadius: '8px',
-                fontSize: '14px',
-                transition: 'border-color 0.2s',
-                outline: 'none',
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#0055ff'}
-              onBlur={(e) => e.target.style.borderColor = '#e6e6e6'}
+              style={inputStyle}
             />
           </div>
 
@@ -291,51 +193,97 @@ const Login = () => {
             type="submit"
             disabled={loading}
             style={{
-              width: '100%',
-              padding: '12px',
+              ...buttonStyle,
               backgroundColor: '#0055ff',
               color: 'white',
-              fontSize: '14px',
-              fontWeight: '500',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s',
-              marginBottom: '16px'
+              marginBottom: '20px',
             }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#0040cc'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#0055ff'}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Logging in...' : 'Log In'}
           </button>
         </form>
 
-        {/* Create Account Button */}
         <div style={{
-            textAlign: 'center',
-            color: '#666',
-            fontSize: '14px'
-          }}>
-            Don't have an account?{' '}
-        <button
-          type="button"
-          onClick={handleCreateAccountClick}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#0055ff',
-            cursor: 'pointer',
-            padding: 0,
-            fontSize: '14px',
-            fontWeight: '500'
-          }}
-        >
-          Create account
-        </button>
+          textAlign: 'center',
+          color: '#666',
+          fontSize: '14px'
+        }}>
+          <button
+            type="button"
+            onClick={() => navigate('/forgot-password')} 
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#0055ff',
+              cursor: 'pointer',
+              padding: 0,
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            Forgot password?
+          </button>
+        </div>
+
+        <div style={{
+          textAlign: 'center',
+          color: '#666',
+          fontSize: '14px',
+          marginTop: '20px'
+        }}>
+          Don't have an account?{' '}
+          <button
+            type="button"
+            onClick={() => navigate('/signup')} 
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#0055ff',
+              cursor: 'pointer',
+              padding: 0,
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            Sign Up
+          </button>
         </div>
       </div>
     </div>
   );
+};
+
+const buttonStyle = {
+  width: '100%',
+  padding: '12px',
+  backgroundColor: 'white',
+  border: '1px solid #e6e6e6',
+  borderRadius: '8px',
+  fontSize: '14px',
+  fontWeight: '500',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'background-color 0.2s',
+};
+
+const inputStyle = {
+  width: '93.3%',
+  padding: '12px',
+  border: '1px solid #e6e6e6',
+  borderRadius: '8px',
+  fontSize: '14px',
+  transition: 'border-color 0.2s',
+  outline: 'none',
+};
+
+const labelStyle = {
+  display: 'block',
+  marginBottom: '8px',
+  color: '#333',
+  fontSize: '14px',
+  fontWeight: '500',
 };
 
 export default Login;

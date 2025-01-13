@@ -1,16 +1,36 @@
 import React, { useState } from 'react';
 import { FaVolumeUp, FaClipboard, FaShareAlt } from 'react-icons/fa';
 import { Button } from 'react-bootstrap';
+import axios from 'axios';
 
 const TextToSpeech = () => {
   const [text, setText] = useState("");
   const [language, setLanguage] = useState("en-US"); 
 
-  const handleSpeak = (text) => {
+  const handleSpeak = async (text) => {
     if (text) {
-      const msg = new SpeechSynthesisUtterance(text);
-      msg.lang = language; 
-      window.speechSynthesis.speak(msg);
+      try {
+        const response = await axios.post(
+          `https://texttospeech.googleapis.com/v1/text:synthesize?key=AIzaSyC5ZWn3hVLRR2Rcvu6Vp1uQVWqErjVHsvQ`,
+          {
+            input: { text },
+            voice: { languageCode: language, ssmlGender: 'NEUTRAL' },
+            audioConfig: { audioEncoding: 'MP3' },
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          }
+        );
+
+        const audioContent = response.data.audioContent;
+        const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+        audio.play();
+      } catch (error) {
+        console.error('Error synthesizing speech:', error);
+        alert('Failed to synthesize speech. Please try again.');
+      }
     }
   };
 
@@ -104,7 +124,7 @@ const styles = {
     marginBottom: '20px',
   },
   textarea: {
-    width: '95.5%',
+    width: '93%',
     height: '100px',
     padding: '10px',
     fontSize: '14px',

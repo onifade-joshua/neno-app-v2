@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaMicrophone, FaShareAlt } from 'react-icons/fa';
 import { Button, Form } from 'react-bootstrap';
+import axios from 'axios';
 
 const SpeechToText = () => {
   const [text, setText] = useState('');
@@ -27,21 +28,20 @@ const SpeechToText = () => {
       return;
     }
 
-    const response = await fetch('https://libretranslate.de/translate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    try {
+      const response = await axios.post('https://translation.googleapis.com/language/translate/v2', {
         q: text,
         source: 'en',
         target: selectedLanguage,
         format: 'text',
-      }),
-    });
+        key: 'AIzaSyBIrzC44dgadn6Ac2SpbIWFWfpPNoJH5Mc' // Replace with your Google Translate API key
+      });
 
-    const data = await response.json();
-    setTranslatedText(data.translatedText);
+      setTranslatedText(response.data.data.translations[0].translatedText);
+    } catch (error) {
+      console.error('Error translating text:', error);
+      alert('Failed to translate text. Please try again.');
+    }
   };
 
   return (
@@ -135,7 +135,7 @@ const styles = {
     marginRight: '5px',
   },
   textarea: {
-    width: '95.5%',
+    width: '93%',
     height: '100px',
     padding: '10px',
     fontSize: '14px',
